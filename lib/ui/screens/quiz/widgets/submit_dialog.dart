@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:quiz_app/ui/providers/quiz/quiz_provider.dart';
 import 'package:quiz_app/ui_helper.dart';
 
-class SubmitDialog extends StatefulWidget {
+class SubmitDialog extends ConsumerWidget {
   final Future<void> Function() submitQuiz;
   const SubmitDialog({
     Key? key,
@@ -9,16 +11,9 @@ class SubmitDialog extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<SubmitDialog> createState() => _SubmitDialogState();
-}
-
-class _SubmitDialogState extends State<SubmitDialog> {
-  bool isSubmiting = false;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return WillPopScope(
-      onWillPop: () async => !isSubmiting,
+      onWillPop: () async => !ref.watch(isQuizSubmittingProvider),
       child: AlertDialog(
         title: const Text('Submit Test'),
         titleTextStyle: TextStyle(
@@ -63,16 +58,18 @@ class _SubmitDialogState extends State<SubmitDialog> {
               ),
             ),
             onPressed: () async {
-              setState(() {
-                isSubmiting = true;
-              });
+              // setState(() {
+              //   isSubmiting = true;
+              // });
+              ref.read(isQuizSubmittingProvider.notifier).state = true;
               // await Future.delayed(const Duration(seconds: 2));
-              await widget.submitQuiz();
-              setState(() {
-                isSubmiting = false;
-              });
+              await submitQuiz();
+              ref.read(isQuizSubmittingProvider.notifier).state = false;
+              // setState(() {
+              //   isSubmiting = false;
+              // });
             },
-            child: isSubmiting
+            child: ref.watch(isQuizSubmittingProvider)
                 ? CircularProgressIndicator(
                     color: UIHelper.mainThemeColor,
                   )

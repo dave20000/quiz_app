@@ -3,18 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:quiz_app/models/result.dart';
 import 'package:quiz_app/ui_helper.dart';
 
-class QuizResultScreen extends StatefulWidget {
+class QuizResultScreen extends StatelessWidget {
   final Result result;
   const QuizResultScreen({
     Key? key,
     required this.result,
   }) : super(key: key);
 
-  @override
-  _QuizResultScreenState createState() => _QuizResultScreenState();
-}
-
-class _QuizResultScreenState extends State<QuizResultScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,7 +62,7 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      widget.result.correctAnswers.toString(),
+                      result.correctAnswers.toString(),
                       style: const TextStyle(
                         color: Colors.black,
                         fontSize: 18,
@@ -76,7 +71,7 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
                     ),
                     UIHelper.horizontalDividerSmall(),
                     Text(
-                      "(${widget.result.score}%)",
+                      "(${result.score}%)",
                       style: const TextStyle(
                         color: Colors.black,
                         fontSize: 16,
@@ -108,7 +103,7 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      widget.result.incorrectAnswers.toString(),
+                      result.incorrectAnswers.toString(),
                       style: const TextStyle(
                         color: Colors.black,
                         fontSize: 18,
@@ -117,7 +112,7 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
                     ),
                     UIHelper.horizontalDividerSmall(),
                     Text(
-                      "(${(widget.result.incorrectAnswers) / (widget.result.questions.length) * 100}%)",
+                      "(${(result.incorrectAnswers) / (result.questions.length) * 100}%)",
                       style: const TextStyle(
                         color: Colors.black,
                         fontSize: 16,
@@ -138,7 +133,7 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
               ),
               child: ListTile(
                 title: Text(
-                  "Not Answerd",
+                  "Not Answered",
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -149,7 +144,7 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      widget.result.unAnswered.toString(),
+                      result.unAnswered.toString(),
                       style: const TextStyle(
                         color: Colors.black,
                         fontSize: 18,
@@ -158,7 +153,7 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
                     ),
                     UIHelper.horizontalDividerSmall(),
                     Text(
-                      "(${(widget.result.unAnswered) / (widget.result.questions.length) * 100}%)",
+                      "(${(result.unAnswered) / (result.questions.length) * 100}%)",
                       style: const TextStyle(
                         color: Colors.black,
                         fontSize: 16,

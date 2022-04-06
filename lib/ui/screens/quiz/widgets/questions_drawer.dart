@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quiz_app/models/question.dart';
+import 'package:quiz_app/ui/providers/quiz/quiz_provider.dart';
 import 'package:quiz_app/ui_helper.dart';
 
-class QuestionsDrawer extends StatefulWidget {
+class QuestionsDrawer extends ConsumerWidget {
   final double statusBarHeight;
   final double appBarHeight;
   final List<Question> questions;
@@ -21,18 +23,11 @@ class QuestionsDrawer extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<QuestionsDrawer> createState() => _QuestionsDrawerState();
-}
-
-class _QuestionsDrawerState extends State<QuestionsDrawer> {
-  bool isListView = true;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     int questionsAnswered = 0;
     int questionsMarked = 0;
     int questionsNotAnswered = 0;
-    for (var question in widget.questions) {
+    for (var question in questions) {
       if (question.isAnswered == true) {
         questionsAnswered++;
       } else {
@@ -43,8 +38,7 @@ class _QuestionsDrawerState extends State<QuestionsDrawer> {
       }
     }
     return Container(
-      padding:
-          EdgeInsets.only(top: widget.statusBarHeight + widget.appBarHeight),
+      padding: EdgeInsets.only(top: statusBarHeight + appBarHeight),
       child: Drawer(
         backgroundColor: UIHelper.backgroundColor,
         child: Column(
@@ -64,11 +58,13 @@ class _QuestionsDrawerState extends State<QuestionsDrawer> {
                     ),
                     child: InkWell(
                       onTap: () {
-                        if (!isListView) {
-                          setState(() {
-                            isListView = true;
-                          });
-                        }
+                        // if (!isListView) {
+                        //   setState(() {
+                        //     isListView = true;
+                        //   });
+                        // }
+                        ref.read(isListViewProvider.notifier).state =
+                            !ref.watch(isListViewProvider);
                       },
                       child: Center(
                         child: Row(
@@ -109,11 +105,14 @@ class _QuestionsDrawerState extends State<QuestionsDrawer> {
                     ),
                     child: InkWell(
                       onTap: () {
-                        if (isListView) {
-                          setState(() {
-                            isListView = false;
-                          });
-                        }
+                        // if (isListView) {
+                        //   setState(() {
+                        //     isListView = false;
+                        //   });
+                        // }
+
+                        ref.read(isListViewProvider.notifier).state =
+                            !ref.watch(isListViewProvider);
                       },
                       child: Center(
                         child: Row(
@@ -236,10 +235,10 @@ class _QuestionsDrawerState extends State<QuestionsDrawer> {
             ),
             UIHelper.verticalDivider(),
             Expanded(
-              child: !isListView
+              child: !ref.watch(isListViewProvider)
                   ? GridView.builder(
                       padding: const EdgeInsets.all(16),
-                      itemCount: widget.questions.length,
+                      itemCount: questions.length,
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 5,
@@ -249,22 +248,21 @@ class _QuestionsDrawerState extends State<QuestionsDrawer> {
                       itemBuilder: (BuildContext context, int index) {
                         return GestureDetector(
                           onTap: () {
-                            widget.goToQuestion(index);
+                            goToQuestion(index);
                             //ToDo: Isko uncomment karna hai
                             // Navigator.pop(context);
                           },
                           child: Container(
                             decoration: BoxDecoration(
                               shape: BoxShape.rectangle,
-                              color: widget.questions[index].isMarkedForReview!
+                              color: questions[index].isMarkedForReview!
                                   ? UIHelper.questionMarkedColor
-                                  : widget.questions[index].isAnswered!
+                                  : questions[index].isAnswered!
                                       ? UIHelper.questionAnsweredColor
                                       : UIHelper.questionNotAnsweredColor,
                               borderRadius: BorderRadius.circular(8),
-                              border: !widget.questions[index].isAnswered! &&
-                                      !widget
-                                          .questions[index].isMarkedForReview!
+                              border: !questions[index].isAnswered! &&
+                                      !questions[index].isMarkedForReview!
                                   ? Border.all(
                                       width: 4,
                                       color: UIHelper
@@ -276,12 +274,11 @@ class _QuestionsDrawerState extends State<QuestionsDrawer> {
                               child: Text(
                                 "${index + 1}",
                                 style: TextStyle(
-                                  color:
-                                      widget.questions[index].isMarkedForReview!
-                                          ? Colors.black
-                                          : widget.questions[index].isAnswered!
-                                              ? Colors.white
-                                              : Colors.black,
+                                  color: questions[index].isMarkedForReview!
+                                      ? Colors.black
+                                      : questions[index].isAnswered!
+                                          ? Colors.white
+                                          : Colors.black,
                                   fontSize: 17,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -294,11 +291,11 @@ class _QuestionsDrawerState extends State<QuestionsDrawer> {
                   : ListView.builder(
                       physics: const BouncingScrollPhysics(),
                       padding: EdgeInsets.zero,
-                      itemCount: widget.questions.length,
+                      itemCount: questions.length,
                       itemBuilder: (BuildContext context, int index) {
                         return GestureDetector(
                           onTap: () {
-                            widget.goToQuestion(index);
+                            goToQuestion(index);
                             //ToDo: Isko uncomment karna hai
                             // Navigator.pop(context);
                           },
@@ -309,7 +306,7 @@ class _QuestionsDrawerState extends State<QuestionsDrawer> {
                             ),
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              border: widget.currentPageIndex == index
+                              border: currentPageIndex == index
                                   ? Border.all(
                                       color: UIHelper.mainThemeColor,
                                       width: 3,
@@ -325,35 +322,31 @@ class _QuestionsDrawerState extends State<QuestionsDrawer> {
                                   width: 32,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.rectangle,
-                                    color: widget
-                                            .questions[index].isMarkedForReview!
+                                    color: questions[index].isMarkedForReview!
                                         ? UIHelper.questionMarkedColor
-                                        : widget.questions[index].isAnswered!
+                                        : questions[index].isAnswered!
                                             ? UIHelper.questionAnsweredColor
                                             : UIHelper.questionNotAnsweredColor,
                                     borderRadius: BorderRadius.circular(8),
-                                    border:
-                                        !widget.questions[index].isAnswered! &&
-                                                !widget.questions[index]
-                                                    .isMarkedForReview!
-                                            ? Border.all(
-                                                width: 4,
-                                                color: UIHelper
-                                                    .questionNotAnsweredBorderColor,
-                                              )
-                                            : const Border(),
+                                    border: !questions[index].isAnswered! &&
+                                            !questions[index].isMarkedForReview!
+                                        ? Border.all(
+                                            width: 4,
+                                            color: UIHelper
+                                                .questionNotAnsweredBorderColor,
+                                          )
+                                        : const Border(),
                                   ),
                                   child: Center(
                                     child: Text(
                                       "${index + 1}",
                                       style: TextStyle(
-                                        color: widget.questions[index]
-                                                .isMarkedForReview!
-                                            ? Colors.black
-                                            : widget.questions[index]
-                                                    .isAnswered!
-                                                ? Colors.white
-                                                : Colors.black,
+                                        color:
+                                            questions[index].isMarkedForReview!
+                                                ? Colors.black
+                                                : questions[index].isAnswered!
+                                                    ? Colors.white
+                                                    : Colors.black,
                                         fontSize: 17,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -365,7 +358,7 @@ class _QuestionsDrawerState extends State<QuestionsDrawer> {
                                   child: Container(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Text(
-                                      widget.questions[index].question!,
+                                      questions[index].question!,
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
@@ -396,7 +389,7 @@ class _QuestionsDrawerState extends State<QuestionsDrawer> {
                 child: InkWell(
                   onTap: () {
                     Navigator.pop(context);
-                    widget.submitTest();
+                    submitTest();
                   },
                   borderRadius: BorderRadius.circular(16),
                   child: const Center(

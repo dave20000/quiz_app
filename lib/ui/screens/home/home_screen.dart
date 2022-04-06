@@ -2,15 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:quiz_app/ui/screens/quiz/quiz_screen.dart';
 import 'package:quiz_app/ui_helper.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class HomeScreen extends StatelessWidget {
+  HomeScreen({Key? key}) : super(key: key);
 
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  List<String> categories = [
+  final List<String> categories = [
     "linux",
     "sql",
     "devops",
@@ -20,7 +15,7 @@ class _HomeScreenState extends State<HomeScreen> {
     "uncategorized",
   ];
 
-  List<String> difficulties = ["Easy", "Medium", "Hard"];
+  final List<String> difficulties = ["Easy", "Medium", "Hard"];
   @override
   Widget build(BuildContext context) {
     return Scaffold(

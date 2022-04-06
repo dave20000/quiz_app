@@ -1,600 +1,199 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quiz_app/models/question.dart';
+
 import 'package:quiz_app/models/result.dart';
-import 'package:quiz_app/ui/screens/quiz/widgets/question_option.dart';
-import 'package:quiz_app/ui/screens/quiz/widgets/questions_drawer.dart';
-import 'package:quiz_app/ui/screens/quiz/widgets/quiz_bottom_button_bar.dart';
-import 'package:quiz_app/ui/screens/quiz/widgets/submit_dialog.dart';
+import 'package:quiz_app/ui/providers/quiz/quiz_provider.dart';
+import 'package:quiz_app/ui/providers/quiz/quiz_states.dart';
 import 'package:quiz_app/ui/screens/quiz_result/quiz_result_screen.dart';
 import 'package:quiz_app/ui_helper.dart';
 
-class QuizScreen extends StatefulWidget {
-  final String testUrl;
+import 'widgets/quiz_question.dart';
+import 'widgets/questions_drawer.dart';
+import 'widgets/quiz_bottom_button_bar.dart';
+import 'widgets/submit_dialog.dart';
+
+class QuizScreen extends ConsumerStatefulWidget {
   const QuizScreen({
     Key? key,
     required this.testUrl,
   }) : super(key: key);
 
+  final String testUrl;
+
   @override
   _QuizScreenState createState() => _QuizScreenState();
 }
 
-class _QuizScreenState extends State<QuizScreen> {
+class _QuizScreenState extends ConsumerState<QuizScreen> {
+  // static const countdownDuration = Duration(minutes: 20);
+  // static const countDown = true;
+
   PageController pageController = PageController();
-
-  late List<Question> questions;
-
-  double progressValue = 0.1;
-
-  bool isLoading = false;
-
-  static const countdownDuration = Duration(minutes: 20);
-  Duration duration = const Duration();
-  Timer? timer;
-
-  bool countDown = true;
-
-  @override
-  void initState() {
-    questions = [];
-    fetchQuestions();
-    reset();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    pageController.dispose();
-    if (timer != null) timer!.cancel();
-    super.dispose();
-  }
-
-  Future<void> fetchQuestions() async {
-    setState(() {
-      isLoading = true;
-    });
-    try {
-      var response = await http.get(
-        Uri.parse(
-          widget.testUrl,
-        ),
-      );
-      if (response.statusCode == 200) {
-        var questionsJson = jsonDecode(response.body) as List;
-        List<Question> questionList = [];
-        for (var questionJson in questionsJson) {
-          questionList.add(Question.fromMap(questionJson));
-        }
-        setState(() {
-          questions = questionList;
-        });
-      } else {
-        setState(() {
-          questions = [];
-        });
-      }
-    } catch (e) {
-      print(e.toString());
-      setState(() {
-        questions = [];
-      });
-    }
-    startTimer();
-
-    setState(() {
-      isLoading = false;
-    });
-  }
-
-  void reset() {
-    if (countDown) {
-      setState(() => duration = countdownDuration);
-    } else {
-      setState(() => duration = const Duration());
-    }
-  }
-
-  void startTimer() {
-    timer = Timer.periodic(const Duration(seconds: 1), (_) => addTime());
-  }
-
-  void addTime() async {
-    final addSeconds = countDown ? -1 : 1;
-    setState(() {
-      final seconds = duration.inSeconds + addSeconds;
-      if (seconds < 0) {
-        timer?.cancel();
-      } else {
-        duration = Duration(seconds: seconds);
-      }
-    });
-    if (!timer!.isActive) {
-      await submitQuiz(isDialogOrSheetOpen: false);
-    }
-  }
-
-  int currentPageIndex = 0;
-
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
-  Widget buildTime() {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
-    final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Text(
-        minutes,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          color: Colors.black,
-          fontSize: 16,
-        ),
-      ),
-      UIHelper.horizontalDividerExtraSmall(),
-      const Text(
-        ":",
-        style: TextStyle(
-            fontWeight: FontWeight.bold, color: Colors.black, fontSize: 16),
-      ),
-      UIHelper.horizontalDividerExtraSmall(),
-      Text(
-        seconds,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          color: Colors.black,
-          fontSize: 16,
-        ),
-      ),
-    ]);
-  }
+  // Timer? timer;
 
-  @override
-  Widget build(BuildContext context) {
-    var statusBarHeight = MediaQuery.of(context).padding.top;
-    var appBarHeight = kToolbarHeight;
-    return WillPopScope(
-      onWillPop: () async {
-        testSubmitDialog(context);
-        return false;
-      },
-      child: Scaffold(
-        backgroundColor: UIHelper.backgroundColor,
-        appBar: AppBar(
-          centerTitle: true,
-          backgroundColor: UIHelper.backgroundColor,
-          elevation: 0,
-          automaticallyImplyLeading: false,
-          leading: IconButton(
-            onPressed: () {
-              testSubmitDialog(context);
-            },
-            icon: const Icon(
-              Icons.clear,
-              color: Colors.black,
-            ),
-          ),
-          title: GestureDetector(
-            onTap: () {
-              showModalBottomSheet(
-                shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
-                )),
-                context: context,
-                builder: (context) => Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      UIHelper.verticalDivider(),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                width: 4,
-                                color: UIHelper.mainThemeColor,
-                              ),
-                            ),
-                            child: const Icon(Icons.pause),
-                          ),
-                          UIHelper.horizontalDivider(),
-                          const Text(
-                            "Submit Test",
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      UIHelper.verticalDividerSmall(),
-                      const Text(
-                        "Are you sure you want to submit the test and exit?",
-                        style: TextStyle(
-                          fontSize: 18,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      UIHelper.verticalDividerSmall(),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  primary: UIHelper.mainThemeColor,
-                                  onPrimary: Colors.white60,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Text(
-                                  "Cancel",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  primary: UIHelper.mainThemeColor,
-                                  onPrimary: Colors.white60,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                onPressed: () async {
-                                  await submitQuiz(isDialogOrSheetOpen: true);
-                                },
-                                child: const Text(
-                                  "Yes, Submit",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-              );
-            },
-            child: Column(
+  // List<Question>? questions;
+
+  // void startTimer() {
+  //   timer = Timer.periodic(const Duration(seconds: 1), (_) => addTime());
+  // }
+
+  // void addTime() async {
+  //   const addSeconds = countDown ? -1 : 1;
+  //   setState(() {
+  //     final seconds = ref.watch(durationProvider).inSeconds + addSeconds;
+  //     if (seconds < 0) {
+  //       timer?.cancel();
+  //     } else {
+  //       ref.read(durationProvider.notifier).state = Duration(seconds: seconds);
+  //     }
+  //   });
+  //   if (!timer!.isActive) {
+  //     // await submitQuiz(questions: questions!, isDialogOrSheetOpen: false);
+  //   }
+  // }
+
+  // @override
+  // void dispose() {
+  //   pageController.dispose();
+  //   if (timer != null) timer!.cancel();
+  //   super.dispose();
+  // }
+
+  // void reset() {
+  //   if (countDown) {
+  //     ref.read(durationProvider.notifier).state = countdownDuration;
+  //   } else {
+  //     ref.read(durationProvider.notifier).state = const Duration();
+  //   }
+  // }
+
+  submitTestBottomSheet(BuildContext context, List<Question> questions) async {
+    showModalBottomSheet(
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(16),
+        topRight: Radius.circular(16),
+      )),
+      context: context,
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            UIHelper.verticalDivider(),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.timer_outlined,
-                  color: Colors.black,
-                  size: 16,
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      width: 4,
+                      color: UIHelper.mainThemeColor,
+                    ),
+                  ),
+                  child: const Icon(Icons.pause),
                 ),
-                UIHelper.verticalDividerExtraSmall(),
-                buildTime(),
+                UIHelper.horizontalDivider(),
+                const Text(
+                  "Submit Test",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
-          ),
-          actions: [
-            IconButton(
-              onPressed: () {
-                if (_scaffoldKey.currentState!.isDrawerOpen) {
-                  Navigator.pop(context);
-                } else {
-                  _scaffoldKey.currentState!.openEndDrawer();
-                }
-              },
-              icon: const Icon(
-                Icons.menu,
-                color: Colors.black,
+            UIHelper.verticalDividerSmall(),
+            const Text(
+              "Are you sure you want to submit the test and exit?",
+              style: TextStyle(
+                fontSize: 18,
               ),
+              textAlign: TextAlign.center,
             ),
-          ],
-        ),
-        drawerScrimColor: Colors.transparent,
-        endDrawer: isLoading
-            ? const SizedBox()
-            : QuestionsDrawer(
-                statusBarHeight: statusBarHeight,
-                appBarHeight: appBarHeight,
-                questions: questions,
-                goToQuestion: (int questionPage) {
-                  pageController.animateToPage(
-                    questionPage,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeIn,
-                  );
-                },
-                currentPageIndex: currentPageIndex,
-                submitTest: () {
-                  testSubmitDialog(context);
-                },
-              ),
-        key: _scaffoldKey,
-        body: isLoading
-            ? Center(
-                child: CircularProgressIndicator(
-                  color: UIHelper.mainThemeColor,
-                ),
-              )
-            : questions.isEmpty
-                ? Center(
-                    child: Text(
-                      "Unable to load test plz exit",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: UIHelper.mainThemeColor,
+            UIHelper.verticalDividerSmall(),
+            Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        primary: UIHelper.mainThemeColor,
+                        onPrimary: Colors.white60,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text(
+                        "Cancel",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
-                  )
-                : Stack(
-                    children: [
-                      PageView.builder(
-                        onPageChanged: (pageNumber) {
-                          setState(() {
-                            currentPageIndex = pageNumber;
-                            progressValue = (pageNumber + 1) / questions.length;
-                          });
-                        },
-                        physics: const BouncingScrollPhysics(),
-                        controller: pageController,
-                        itemCount: questions.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: UIHelper.mainThemeColor,
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        "${index + 1}",
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ),
-                                    UIHelper.horizontalDividerSmall(),
-                                    if (questions[index]
-                                            .multipleCorrectAnswers ==
-                                        "true")
-                                      const Text(
-                                        "Multiple Choice",
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    const Spacer(),
-                                    IconButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          questions[index].isMarkedForReview =
-                                              questions[index]
-                                                          .isMarkedForReview ==
-                                                      null
-                                                  ? true
-                                                  : !questions[index]
-                                                      .isMarkedForReview!;
-                                        });
-                                      },
-                                      icon: questions[index].isMarkedForReview!
-                                          ? Icon(
-                                              Icons.bookmark,
-                                              color: UIHelper.mainThemeColor,
-                                            )
-                                          : Icon(
-                                              Icons.bookmark_border,
-                                              color: UIHelper.mainThemeColor,
-                                            ),
-                                    ),
-                                  ],
-                                ),
-                                UIHelper.verticalDivider(),
-                                Expanded(
-                                  child: SingleChildScrollView(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          questions[index].question ??
-                                              "Unable to load que",
-                                          style: const TextStyle(
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 18,
-                                          ),
-                                          textAlign: TextAlign.left,
-                                        ),
-                                        UIHelper.verticalDivider(),
-                                        for (int i = 0; i < 6; i++)
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                                bottom: 16),
-                                            child: QuestionOption(
-                                              isSelected: questions[index]
-                                                          .multipleCorrectAnswers ==
-                                                      "false"
-                                                  ? questions[index]
-                                                              .selectedOption ==
-                                                          i
-                                                      ? true
-                                                      : false
-                                                  : questions[index]
-                                                          .selectedOptions!
-                                                          .contains(i)
-                                                      ? true
-                                                      : false,
-                                              selectOption:
-                                                  (int selectedOptionNumber) {
-                                                if (questions[index]
-                                                        .multipleCorrectAnswers ==
-                                                    "false") {
-                                                  setState(() {
-                                                    questions[index]
-                                                            .selectedOption =
-                                                        selectedOptionNumber;
-                                                  });
-                                                } else {
-                                                  setState(() {
-                                                    questions[index]
-                                                        .selectedOptions!
-                                                        .add(
-                                                            selectedOptionNumber);
-                                                  });
-                                                }
-                                                setState(() {
-                                                  questions[index].isAnswered =
-                                                      true;
-                                                });
-                                              },
-                                              deSelectOption:
-                                                  (int selectedOptionNumber) {
-                                                if (questions[index]
-                                                        .multipleCorrectAnswers ==
-                                                    "false") {
-                                                  setState(() {
-                                                    questions[index]
-                                                        .selectedOption = null;
-                                                  });
-                                                } else {
-                                                  setState(() {
-                                                    questions[index]
-                                                        .selectedOptions!
-                                                        .remove(
-                                                            selectedOptionNumber);
-                                                  });
-                                                }
-                                                setState(() {
-                                                  questions[index].isAnswered =
-                                                      false;
-                                                });
-                                              },
-                                              optionNumber: i,
-                                              optionValue: i == 0
-                                                  ? questions[index]
-                                                      .answers!
-                                                      .answerA
-                                                  : i == 1
-                                                      ? questions[index]
-                                                          .answers!
-                                                          .answerB
-                                                      : i == 2
-                                                          ? questions[index]
-                                                              .answers!
-                                                              .answerC
-                                                          : i == 3
-                                                              ? questions[index]
-                                                                  .answers!
-                                                                  .answerD
-                                                              : i == 4
-                                                                  ? questions[
-                                                                          index]
-                                                                      .answers!
-                                                                      .answerE
-                                                                  : questions[
-                                                                          index]
-                                                                      .answers!
-                                                                      .answerF,
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                      LinearProgressIndicator(
-                        value: progressValue,
-                        backgroundColor: Colors.grey,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            UIHelper.mainThemeColor),
-                      ),
-                    ],
                   ),
-        bottomNavigationBar: isLoading
-            ? const SizedBox()
-            : QuizBottomButtonBar(
-                clearAnswer: () {
-                  setState(() {
-                    questions[currentPageIndex].selectedOption = null;
-                    questions[currentPageIndex].selectedOptions = [];
-                  });
-                },
-                markForReview: () {
-                  setState(() {
-                    questions[currentPageIndex].isMarkedForReview = true;
-                  });
-                  pageController.nextPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeIn,
-                  );
-                },
-                saveAndNextQuestion: () {
-                  if (currentPageIndex == (questions.length - 1)) {
-                    testSubmitDialog(context);
-                  } else {
-                    pageController.nextPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeIn,
-                    );
-                  }
-                },
-                btnText: currentPageIndex == (questions.length - 1)
-                    ? "Submit"
-                    : "Save & Next",
-              ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        primary: UIHelper.mainThemeColor,
+                        onPrimary: Colors.white60,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () async {
+                        await submitQuiz(
+                            questions: questions, isDialogOrSheetOpen: true);
+                      },
+                      child: const Text(
+                        "Yes, Submit",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }
 
-  Future<dynamic> testSubmitDialog(BuildContext context) {
+  Future<dynamic> testSubmitDialog(
+      List<Question> questions, BuildContext context) {
     return showDialog(
       context: context,
       builder: (context) => SubmitDialog(
-        submitQuiz: () async => await submitQuiz(isDialogOrSheetOpen: true),
+        submitQuiz: () async =>
+            await submitQuiz(questions: questions, isDialogOrSheetOpen: true),
       ),
     );
   }
 
-  Future<void> submitQuiz({required bool isDialogOrSheetOpen}) async {
+  Future<void> submitQuiz(
+      {required List<Question> questions,
+      required bool isDialogOrSheetOpen}) async {
     int correctAnswerNumber = 0;
     int incorrectAnswerNumber = 0;
     int unAnswered = 0;
@@ -664,6 +263,188 @@ class _QuizScreenState extends State<QuizScreen> {
         builder: (context) => QuizResultScreen(
           result: result,
         ),
+      ),
+    );
+  }
+
+  // Widget buildTime() {
+  //   String twoDigits(int n) => n.toString().padLeft(2, '0');
+  //   final minutes =
+  //       twoDigits(ref.watch(durationProvider).inMinutes.remainder(60));
+  //   final seconds =
+  //       twoDigits(ref.watch(durationProvider).inSeconds.remainder(60));
+  //   return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+  //     Text(
+  //       minutes,
+  //       style: const TextStyle(
+  //         fontWeight: FontWeight.bold,
+  //         color: Colors.black,
+  //         fontSize: 16,
+  //       ),
+  //     ),
+  //     UIHelper.horizontalDividerExtraSmall(),
+  //     const Text(
+  //       ":",
+  //       style: TextStyle(
+  //           fontWeight: FontWeight.bold, color: Colors.black, fontSize: 16),
+  //     ),
+  //     UIHelper.horizontalDividerExtraSmall(),
+  //     Text(
+  //       seconds,
+  //       style: const TextStyle(
+  //         fontWeight: FontWeight.bold,
+  //         color: Colors.black,
+  //         fontSize: 16,
+  //       ),
+  //     ),
+  //   ]);
+  // }
+
+  @override
+  Widget build(BuildContext context) {
+    final quizState = ref.watch(quizProvider);
+    final quizNotifier = ref.watch(quizProvider.notifier);
+
+    // reset();
+
+    final questions = quizState.maybeWhen(
+        data: (questions) {
+          // startTimer();
+          return questions;
+        },
+        orElse: () => null);
+
+    var statusBarHeight = MediaQuery.of(context).padding.top;
+    var appBarHeight = kToolbarHeight;
+    return WillPopScope(
+      onWillPop: () async {
+        testSubmitDialog(questions!, context);
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: UIHelper.backgroundColor,
+        appBar: AppBar(
+          centerTitle: true,
+          backgroundColor: UIHelper.backgroundColor,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          leading: IconButton(
+            onPressed: () {
+              testSubmitDialog(questions!, context);
+            },
+            icon: const Icon(
+              Icons.clear,
+              color: Colors.black,
+            ),
+          ),
+          title: GestureDetector(
+            onTap: () async {
+              await submitTestBottomSheet(context, questions!);
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.timer_outlined,
+                  color: Colors.black,
+                  size: 16,
+                ),
+                UIHelper.verticalDividerExtraSmall(),
+                // buildTime(),
+              ],
+            ),
+          ),
+          actions: [
+            IconButton(
+              onPressed: () {
+                if (_scaffoldKey.currentState!.isDrawerOpen) {
+                  Navigator.pop(context);
+                } else {
+                  _scaffoldKey.currentState!.openEndDrawer();
+                }
+              },
+              icon: const Icon(
+                Icons.menu,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        ),
+        drawerScrimColor: Colors.transparent,
+        endDrawer: quizState.isLoading
+            ? const SizedBox()
+            : QuestionsDrawer(
+                statusBarHeight: statusBarHeight,
+                appBarHeight: appBarHeight,
+                questions: questions!,
+                goToQuestion: (int questionPage) {
+                  pageController.animateToPage(
+                    questionPage,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeIn,
+                  );
+                },
+                currentPageIndex: ref.watch(quizPageProvider),
+                submitTest: () {
+                  testSubmitDialog(questions, context);
+                },
+              ),
+        key: _scaffoldKey,
+        body: questions != null
+            ? questions.isEmpty
+                ? const Center(
+                    child: Text("No Questions Found"),
+                  )
+                // : quizQuestion(questions)
+                : QuizQuestion(pageController: pageController)
+            : Center(
+                child: CircularProgressIndicator(
+                  color: UIHelper.mainThemeColor,
+                ),
+              ),
+        // quizState.when(
+        //   data: (questionList) => quizQuestion(questionList),
+        //   initial: () => Center(
+        //     child: CircularProgressIndicator(
+        //       color: UIHelper.mainThemeColor,
+        //     ),
+        //   ),
+        //   loading: () => Center(
+        //     child: CircularProgressIndicator(
+        //       color: UIHelper.mainThemeColor,
+        //     ),
+        //   ),
+        //   error: (msg) => Center(
+        //     child: Text(msg!),
+        //   ),
+        // ),
+        bottomNavigationBar: quizState.isLoading
+            ? const SizedBox()
+            : QuizBottomButtonBar(
+                clearAnswer: () {
+                  quizNotifier.clearAnswer(ref.watch(quizPageProvider));
+                },
+                markForReview: () {
+                  quizNotifier.markForReview(ref.watch(quizPageProvider), true);
+                  pageController.nextPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeIn,
+                  );
+                },
+                saveAndNextQuestion: () {
+                  if (ref.watch(quizPageProvider) == (questions!.length - 1)) {
+                    testSubmitDialog(questions, context);
+                  } else {
+                    pageController.nextPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeIn,
+                    );
+                  }
+                },
+                btnText: ref.watch(quizPageProvider) == (questions!.length - 1)
+                    ? "Submit"
+                    : "Save & Next",
+              ),
       ),
     );
   }
