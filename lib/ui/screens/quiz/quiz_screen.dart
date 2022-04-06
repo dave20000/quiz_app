@@ -18,10 +18,10 @@ import 'widgets/submit_dialog.dart';
 class QuizScreen extends ConsumerStatefulWidget {
   const QuizScreen({
     Key? key,
-    required this.testUrl,
+    required this.quizUrl,
   }) : super(key: key);
 
-  final String testUrl;
+  final String quizUrl;
 
   @override
   _QuizScreenState createState() => _QuizScreenState();
@@ -33,6 +33,12 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
   PageController pageController = PageController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    ref.read(quizProvider.notifier).fetchQuiz(widget.quizUrl);
+  }
 
   // Timer? timer;
 
@@ -85,7 +91,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            UIHelper.verticalDivider(),
+            UIHelper.verticalDivider,
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -102,7 +108,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                   ),
                   child: const Icon(Icons.pause),
                 ),
-                UIHelper.horizontalDivider(),
+                UIHelper.horizontalDivider,
                 const Text(
                   "Submit Test",
                   style: TextStyle(
@@ -112,7 +118,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 ),
               ],
             ),
-            UIHelper.verticalDividerSmall(),
+            UIHelper.verticalDividerSmall,
             const Text(
               "Are you sure you want to submit the test and exit?",
               style: TextStyle(
@@ -120,7 +126,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               ),
               textAlign: TextAlign.center,
             ),
-            UIHelper.verticalDividerSmall(),
+            UIHelper.verticalDividerSmall,
             Row(
               children: [
                 Expanded(
@@ -305,6 +311,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     final quizState = ref.watch(quizProvider);
     final quizNotifier = ref.watch(quizProvider.notifier);
 
+    // quizNotifier.fetchQuiz(widget.quizUrl);
+
     // reset();
 
     final questions = quizState.maybeWhen(
@@ -343,13 +351,13 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             },
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
+              children: const [
+                Icon(
                   Icons.timer_outlined,
                   color: Colors.black,
                   size: 16,
                 ),
-                UIHelper.verticalDividerExtraSmall(),
+                UIHelper.verticalDividerExtraSmall,
                 // buildTime(),
               ],
             ),
@@ -397,7 +405,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                   )
                 // : quizQuestion(questions)
                 : QuizQuestion(pageController: pageController)
-            : Center(
+            : const Center(
                 child: CircularProgressIndicator(
                   color: UIHelper.mainThemeColor,
                 ),

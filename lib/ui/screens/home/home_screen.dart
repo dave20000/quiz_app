@@ -37,7 +37,7 @@ class HomeScreen extends StatelessWidget {
         padding: const EdgeInsets.all(8),
         physics: const BouncingScrollPhysics(),
         itemCount: categories.length,
-        separatorBuilder: (context, index) => UIHelper.verticalDivider(),
+        separatorBuilder: (context, index) => UIHelper.verticalDivider,
         itemBuilder: (context, index) => Padding(
           padding: const EdgeInsets.all(8.0),
           child: Ink(
@@ -48,12 +48,12 @@ class HomeScreen extends StatelessWidget {
                 width: 1,
                 color: UIHelper.mainThemeColor,
               ),
-              boxShadow: [
+              boxShadow: const [
                 BoxShadow(
                   color: UIHelper.mainThemeColor,
                   spreadRadius: 0.5,
                   blurRadius: 1,
-                  offset: const Offset(2, 4),
+                  offset: Offset(2, 4),
                 )
               ],
             ),
@@ -67,7 +67,7 @@ class HomeScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => QuizScreen(testUrl: url),
+                    builder: (context) => QuizScreen(quizUrl: url),
                   ),
                 );
               },
@@ -90,7 +90,7 @@ class HomeScreen extends StatelessWidget {
                 title: Text(
                   categories[index][0].toUpperCase() +
                       categories[index].substring(1),
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: UIHelper.mainThemeColor,
                     fontSize: 20,
                     fontWeight: FontWeight.w500,

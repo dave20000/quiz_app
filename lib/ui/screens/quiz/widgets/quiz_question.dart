@@ -22,8 +22,6 @@ class QuizQuestion extends ConsumerWidget {
         PageView.builder(
           onPageChanged: (pageNumber) {
             ref.read(quizPageProvider.notifier).state = pageNumber;
-            ref.read(progressProvider.notifier).state =
-                (pageNumber + 1) / questions.length;
           },
           physics: const BouncingScrollPhysics(),
           controller: pageController,
@@ -51,7 +49,7 @@ class QuizQuestion extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      UIHelper.horizontalDividerSmall(),
+                      UIHelper.horizontalDividerSmall,
                       if (questions[index].multipleCorrectAnswers == "true")
                         const Text(
                           "Multiple Choice",
@@ -71,18 +69,18 @@ class QuizQuestion extends ConsumerWidget {
                                   : !questions[index].isMarkedForReview!);
                         },
                         icon: questions[index].isMarkedForReview!
-                            ? Icon(
+                            ? const Icon(
                                 Icons.bookmark,
                                 color: UIHelper.mainThemeColor,
                               )
-                            : Icon(
+                            : const Icon(
                                 Icons.bookmark_border,
                                 color: UIHelper.mainThemeColor,
                               ),
                       ),
                     ],
                   ),
-                  UIHelper.verticalDivider(),
+                  UIHelper.verticalDivider,
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
@@ -97,7 +95,7 @@ class QuizQuestion extends ConsumerWidget {
                             ),
                             textAlign: TextAlign.left,
                           ),
-                          UIHelper.verticalDivider(),
+                          UIHelper.verticalDivider,
                           for (int i = 0; i < 6; i++)
                             Padding(
                               padding: const EdgeInsets.only(bottom: 16),
@@ -166,9 +164,10 @@ class QuizQuestion extends ConsumerWidget {
           },
         ),
         LinearProgressIndicator(
-          value: ref.watch(progressProvider.notifier).state,
+          value: ref.watch(progressProvider),
           backgroundColor: Colors.grey,
-          valueColor: AlwaysStoppedAnimation<Color>(UIHelper.mainThemeColor),
+          valueColor:
+              const AlwaysStoppedAnimation<Color>(UIHelper.mainThemeColor),
         ),
       ],
     );

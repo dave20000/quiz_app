@@ -50,7 +50,7 @@ class QuizResultScreen extends StatelessWidget {
                 color: Colors.white,
               ),
               child: ListTile(
-                title: Text(
+                title: const Text(
                   "Correct Answers",
                   style: TextStyle(
                     fontSize: 22,
@@ -69,7 +69,7 @@ class QuizResultScreen extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    UIHelper.horizontalDividerSmall(),
+                    UIHelper.horizontalDividerSmall,
                     Text(
                       "(${result.score}%)",
                       style: const TextStyle(
@@ -91,7 +91,7 @@ class QuizResultScreen extends StatelessWidget {
                 color: Colors.white,
               ),
               child: ListTile(
-                title: Text(
+                title: const Text(
                   "Incorrect Answers",
                   style: TextStyle(
                     fontSize: 22,
@@ -110,7 +110,7 @@ class QuizResultScreen extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    UIHelper.horizontalDividerSmall(),
+                    UIHelper.horizontalDividerSmall,
                     Text(
                       "(${(result.incorrectAnswers) / (result.questions.length) * 100}%)",
                       style: const TextStyle(
@@ -132,7 +132,7 @@ class QuizResultScreen extends StatelessWidget {
                 color: Colors.white,
               ),
               child: ListTile(
-                title: Text(
+                title: const Text(
                   "Not Answered",
                   style: TextStyle(
                     fontSize: 22,
@@ -151,7 +151,7 @@ class QuizResultScreen extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    UIHelper.horizontalDividerSmall(),
+                    UIHelper.horizontalDividerSmall,
                     Text(
                       "(${(result.unAnswered) / (result.questions.length) * 100}%)",
                       style: const TextStyle(

@@ -59,7 +59,7 @@ class _QuestionOptionState extends State<QuestionOption> {
                     value: widget.isSelected,
                     checkColor: UIHelper.mainThemeColor,
                     activeColor: Colors.white,
-                    side: BorderSide(
+                    side: const BorderSide(
                       color: UIHelper.mainThemeColor,
                       width: 2,
                     ),
@@ -71,7 +71,7 @@ class _QuestionOptionState extends State<QuestionOption> {
                       }
                     },
                   ),
-                  UIHelper.horizontalDividerSmall(),
+                  UIHelper.horizontalDividerSmall,
                   Expanded(
                     child: Text(
                       widget.optionValue!,

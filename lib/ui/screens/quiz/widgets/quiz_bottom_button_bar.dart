@@ -17,7 +17,7 @@ class QuizBottomButtonBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         // boxShadow: [
         //   BoxShadow(
         //     color: Colors.grey.withOpacity(0.5),
@@ -31,7 +31,7 @@ class QuizBottomButtonBar extends StatelessWidget {
       padding: const EdgeInsets.all(4),
       child: Row(
         children: [
-          UIHelper.horizontalDividerSmall(),
+          UIHelper.horizontalDividerSmall,
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               primary: Colors.white,
@@ -45,14 +45,14 @@ class QuizBottomButtonBar extends StatelessWidget {
             onPressed: () {
               clearAnswer();
             },
-            child: Text(
+            child: const Text(
               "Clear",
               style: TextStyle(
                 color: UIHelper.mainThemeColor,
               ),
             ),
           ),
-          UIHelper.horizontalDividerSmall(),
+          UIHelper.horizontalDividerSmall,
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               primary: Colors.white,
@@ -75,7 +75,7 @@ class QuizBottomButtonBar extends StatelessWidget {
               markForReview();
             },
 
-            child: Text(
+            child: const Text(
               "Mark for Review",
               style: TextStyle(
                 color: UIHelper.mainThemeColor,
@@ -101,7 +101,7 @@ class QuizBottomButtonBar extends StatelessWidget {
               ),
             ),
           ),
-          UIHelper.horizontalDividerSmall(),
+          UIHelper.horizontalDividerSmall,
         ],
       ),
     );

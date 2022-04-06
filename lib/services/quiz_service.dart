@@ -5,7 +5,7 @@ import 'package:quiz_app/models/question.dart';
 
 import 'package:http/http.dart' as http;
 
-final quizServiceProvider = Provider<IQuizService>(
+final quizServiceProvider = Provider.autoDispose<IQuizService>(
   (ref) => QuizService(),
 );
 

@@ -5,15 +5,20 @@ import 'package:quiz_app/models/question.dart';
 import 'package:quiz_app/services/quiz_service.dart';
 import 'package:quiz_app/ui/providers/quiz/quiz_states.dart';
 
-final quizPageProvider = StateProvider<int>((ref) => 0);
+final quizPageProvider = StateProvider.autoDispose<int>((ref) => 0);
 
-final progressProvider = StateProvider<double>((ref) => 0.1);
+final progressProvider = StateProvider.autoDispose<double>((ref) {
+  final queLength = ref.read(quizProvider.notifier).questionList.length;
+  return (ref.watch(quizPageProvider) + 1) / queLength;
+});
 
-final isListViewProvider = StateProvider<bool>((ref) => true);
+final isListViewProvider = StateProvider.autoDispose<bool>((ref) => true);
 
-final isQuizSubmittingProvider = StateProvider<bool>((ref) => false);
+final isQuizSubmittingProvider =
+    StateProvider.autoDispose<bool>((ref) => false);
 
-final durationProvider = StateProvider<Duration>((ref) => const Duration());
+final durationProvider =
+    StateProvider.autoDispose<Duration>((ref) => const Duration());
 
 final quizProvider = StateNotifierProvider.autoDispose<QuizNotifier, QuizState>(
   (ref) => QuizNotifier(
@@ -29,16 +34,12 @@ class QuizNotifier extends StateNotifier<QuizState> {
   QuizNotifier({
     required IQuizService quizService,
   })  : _quizService = quizService,
-        super(const QuizState.initial()) {
-    fetchQuiz();
-  }
+        super(const QuizState.initial());
 
-  Future<void> fetchQuiz() async {
+  Future<void> fetchQuiz(String quizUrl) async {
     state = const QuizState.loading();
-
     try {
-      final quiz = await _quizService.getQuiz(
-          'https://quizapi.io/api/v1/questions?apiKey=i9yLZ9k0XSPw6uhwAwBfEePOY9J4BkR7UUxEGhtv&category=sql&difficulty=Easy&limit=20');
+      final quiz = await _quizService.getQuiz(quizUrl);
       questionList = quiz;
       state = QuizState.data(questionList: questionList);
     } catch (_) {

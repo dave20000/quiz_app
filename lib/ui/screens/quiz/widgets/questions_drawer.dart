@@ -69,10 +69,10 @@ class QuestionsDrawer extends ConsumerWidget {
                       child: Center(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.list_outlined),
-                            UIHelper.horizontalDividerExtraSmall(),
-                            const Text(
+                          children: const [
+                            Icon(Icons.list_outlined),
+                            UIHelper.horizontalDividerExtraSmall,
+                            Text(
                               "List View",
                               style: TextStyle(
                                 fontSize: 16,
@@ -117,10 +117,10 @@ class QuestionsDrawer extends ConsumerWidget {
                       child: Center(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.grid_view_outlined),
-                            UIHelper.horizontalDividerExtraSmall(),
-                            const Text(
+                          children: const [
+                            Icon(Icons.grid_view_outlined),
+                            UIHelper.horizontalDividerExtraSmall,
+                            Text(
                               "Grid View",
                               style: TextStyle(
                                 fontSize: 16,
@@ -134,7 +134,7 @@ class QuestionsDrawer extends ConsumerWidget {
                 ),
               ],
             ),
-            UIHelper.verticalDividerExtraSmall(),
+            UIHelper.verticalDividerExtraSmall,
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -147,7 +147,7 @@ class QuestionsDrawer extends ConsumerWidget {
                         fontSize: 14,
                       ),
                     ),
-                    UIHelper.horizontalDividerExtraSmall(),
+                    UIHelper.horizontalDividerExtraSmall,
                     Row(
                       children: [
                         Container(
@@ -159,7 +159,7 @@ class QuestionsDrawer extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        UIHelper.horizontalDividerSmall(),
+                        UIHelper.horizontalDividerSmall,
                         Text(
                           questionsAnswered.toString(),
                           style: const TextStyle(fontSize: 16),
@@ -177,7 +177,7 @@ class QuestionsDrawer extends ConsumerWidget {
                         fontSize: 14,
                       ),
                     ),
-                    UIHelper.verticalDividerExtraSmall(),
+                    UIHelper.verticalDividerExtraSmall,
                     Row(
                       children: [
                         Container(
@@ -189,7 +189,7 @@ class QuestionsDrawer extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        UIHelper.horizontalDividerSmall(),
+                        UIHelper.horizontalDividerSmall,
                         Text(
                           questionsMarked.toString(),
                           style: const TextStyle(fontSize: 16),
@@ -207,7 +207,7 @@ class QuestionsDrawer extends ConsumerWidget {
                         fontSize: 14,
                       ),
                     ),
-                    UIHelper.verticalDividerExtraSmall(),
+                    UIHelper.verticalDividerExtraSmall,
                     Row(
                       children: [
                         Container(
@@ -222,7 +222,7 @@ class QuestionsDrawer extends ConsumerWidget {
                             ),
                           ),
                         ),
-                        UIHelper.horizontalDividerSmall(),
+                        UIHelper.horizontalDividerSmall,
                         Text(
                           questionsNotAnswered.toString(),
                           style: const TextStyle(fontSize: 16),
@@ -233,7 +233,7 @@ class QuestionsDrawer extends ConsumerWidget {
                 ),
               ],
             ),
-            UIHelper.verticalDivider(),
+            UIHelper.verticalDivider,
             Expanded(
               child: !ref.watch(isListViewProvider)
                   ? GridView.builder(
@@ -353,7 +353,7 @@ class QuestionsDrawer extends ConsumerWidget {
                                     ),
                                   ),
                                 ),
-                                UIHelper.horizontalDividerExtraSmall(),
+                                UIHelper.horizontalDividerExtraSmall,
                                 Expanded(
                                   child: Container(
                                     padding: const EdgeInsets.all(8.0),
