@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:quiz_app/ui/providers/quiz/quiz_provider.dart';
+import 'package:quiz_app/providers/quiz/quiz_provider.dart';
+import 'package:quiz_app/ui/route/app_route.dart';
 import 'package:quiz_app/ui_helper.dart';
 
 class SubmitDialog extends ConsumerWidget {
@@ -16,7 +17,7 @@ class SubmitDialog extends ConsumerWidget {
       onWillPop: () async => !ref.watch(isQuizSubmittingProvider),
       child: AlertDialog(
         title: const Text('Submit Test'),
-        titleTextStyle: TextStyle(
+        titleTextStyle: const TextStyle(
           color: UIHelper.mainThemeColor,
           fontSize: 20,
           fontWeight: FontWeight.bold,
@@ -40,7 +41,7 @@ class SubmitDialog extends ConsumerWidget {
               shadowColor: Colors.white,
             ),
             onPressed: () {
-              Navigator.of(context).pop();
+              ref.read(appRouterProvider).pop();
             },
             child: const Text(
               'Cancel',
@@ -70,7 +71,7 @@ class SubmitDialog extends ConsumerWidget {
               // });
             },
             child: ref.watch(isQuizSubmittingProvider)
-                ? CircularProgressIndicator(
+                ? const CircularProgressIndicator(
                     color: UIHelper.mainThemeColor,
                   )
                 : const Text(

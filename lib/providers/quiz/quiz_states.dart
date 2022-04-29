@@ -8,7 +8,7 @@ extension QuizGetters on QuizState {
 }
 
 @freezed
-abstract class QuizState with _$QuizState {
+class QuizState with _$QuizState {
   /// Data is present state
   const factory QuizState.data({required List<Question> questionList}) = _Data;
 

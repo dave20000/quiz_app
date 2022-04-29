@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quiz_app/models/question.dart';
-import 'package:quiz_app/ui/providers/quiz/quiz_provider.dart';
+import 'package:quiz_app/providers/quiz/quiz_provider.dart';
+import 'package:quiz_app/ui/route/app_route.dart';
 import 'package:quiz_app/ui_helper.dart';
 
 class QuestionsDrawer extends ConsumerWidget {
@@ -388,7 +389,7 @@ class QuestionsDrawer extends ConsumerWidget {
                 ),
                 child: InkWell(
                   onTap: () {
-                    Navigator.pop(context);
+                    ref.read(appRouterProvider).pop();
                     submitTest();
                   },
                   borderRadius: BorderRadius.circular(16),

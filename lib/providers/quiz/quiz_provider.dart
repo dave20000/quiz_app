@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quiz_app/models/question.dart';
+import 'package:quiz_app/providers/quiz/quiz_states.dart';
 import 'package:quiz_app/services/quiz_service.dart';
-import 'package:quiz_app/ui/providers/quiz/quiz_states.dart';
 
 final quizPageProvider = StateProvider.autoDispose<int>((ref) => 0);
 

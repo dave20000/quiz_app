@@ -5,9 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quiz_app/models/question.dart';
 
 import 'package:quiz_app/models/result.dart';
-import 'package:quiz_app/ui/providers/quiz/quiz_provider.dart';
-import 'package:quiz_app/ui/providers/quiz/quiz_states.dart';
-import 'package:quiz_app/ui/screens/quiz_result/quiz_result_screen.dart';
+import 'package:quiz_app/providers/quiz/quiz_provider.dart';
+import 'package:quiz_app/providers/quiz/quiz_states.dart';
+import 'package:quiz_app/ui/route/app_route.dart';
+import 'package:quiz_app/ui/route/app_route.gr.dart';
 import 'package:quiz_app/ui_helper.dart';
 
 import 'widgets/quiz_question.dart';
@@ -78,7 +79,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   //   }
   // }
 
-  submitTestBottomSheet(BuildContext context, List<Question> questions) async {
+  submitTestBottomSheet(List<Question> questions) async {
     showModalBottomSheet(
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -141,7 +142,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                         ),
                       ),
                       onPressed: () {
-                        Navigator.pop(context);
+                        ref.read(appRouterProvider).pop();
                       },
                       child: const Text(
                         "Cancel",
@@ -186,8 +187,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     );
   }
 
-  Future<dynamic> testSubmitDialog(
-      List<Question> questions, BuildContext context) {
+  Future<dynamic> testSubmitDialog(List<Question> questions) {
     return showDialog(
       context: context,
       builder: (context) => SubmitDialog(
@@ -262,15 +262,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       score: score,
     );
 
-    if (isDialogOrSheetOpen) Navigator.pop(context);
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => QuizResultScreen(
-          result: result,
-        ),
-      ),
-    );
+    if (isDialogOrSheetOpen) ref.read(appRouterProvider).pop();
+
+    ref.read(appRouterProvider).replace(QuizResultRoute(result: result));
   }
 
   // Widget buildTime() {
@@ -326,7 +320,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     var appBarHeight = kToolbarHeight;
     return WillPopScope(
       onWillPop: () async {
-        testSubmitDialog(questions!, context);
+        testSubmitDialog(questions!);
         return false;
       },
       child: Scaffold(
@@ -338,7 +332,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           automaticallyImplyLeading: false,
           leading: IconButton(
             onPressed: () {
-              testSubmitDialog(questions!, context);
+              testSubmitDialog(questions!);
             },
             icon: const Icon(
               Icons.clear,
@@ -347,7 +341,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           ),
           title: GestureDetector(
             onTap: () async {
-              await submitTestBottomSheet(context, questions!);
+              await submitTestBottomSheet(questions!);
             },
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -366,7 +360,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             IconButton(
               onPressed: () {
                 if (_scaffoldKey.currentState!.isDrawerOpen) {
-                  Navigator.pop(context);
+                  ref.read(appRouterProvider).pop();
                 } else {
                   _scaffoldKey.currentState!.openEndDrawer();
                 }
@@ -394,7 +388,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 },
                 currentPageIndex: ref.watch(quizPageProvider),
                 submitTest: () {
-                  testSubmitDialog(questions, context);
+                  testSubmitDialog(questions);
                 },
               ),
         key: _scaffoldKey,
@@ -441,7 +435,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 },
                 saveAndNextQuestion: () {
                   if (ref.watch(quizPageProvider) == (questions!.length - 1)) {
-                    testSubmitDialog(questions, context);
+                    testSubmitDialog(questions);
                   } else {
                     pageController.nextPage(
                       duration: const Duration(milliseconds: 300),

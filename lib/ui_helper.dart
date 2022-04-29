@@ -19,7 +19,7 @@ class UIHelper {
 
   static const Color questionAnsweredColor = Color.fromRGBO(8, 70, 83, 1);
 
-  static Color questionMarkedColor = Colors.grey.shade400;
+  static const Color questionMarkedColor = Colors.grey;
 
   static const Color questionNotAnsweredBorderColor =
       Color.fromRGBO(8, 70, 83, 1);

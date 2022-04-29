@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:quiz_app/ui/providers/quiz/quiz_provider.dart';
+import 'package:quiz_app/providers/quiz/quiz_provider.dart';
 import 'package:quiz_app/ui_helper.dart';
 
 import 'question_option.dart';

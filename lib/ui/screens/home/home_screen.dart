@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:quiz_app/ui/screens/quiz/quiz_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:quiz_app/ui/route/app_route.dart';
+import 'package:quiz_app/ui/route/app_route.gr.dart';
 import 'package:quiz_app/ui_helper.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   HomeScreen({Key? key}) : super(key: key);
 
   final List<String> categories = [
@@ -17,7 +19,7 @@ class HomeScreen extends StatelessWidget {
 
   final List<String> difficulties = ["Easy", "Medium", "Hard"];
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: UIHelper.backgroundColor,
       appBar: AppBar(
@@ -64,12 +66,7 @@ class HomeScreen extends StatelessWidget {
                 url = url + "&category=${categories[index]}";
                 url = url + "&difficulty=${difficulties[1]}";
                 url = url + "&limit=20";
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => QuizScreen(quizUrl: url),
-                  ),
-                );
+                ref.read(appRouterProvider).push(QuizRoute(quizUrl: url));
               },
               splashColor: Colors.blueGrey.shade100,
               borderRadius: BorderRadius.circular(16),
